@@ -11,6 +11,7 @@ import java.util.ArrayList;
 public class ParserEntity {
 
 	private static final String DIR_NAME = "Wikipedia_corpus";
+	private static final String DIR_NAME_WITH_ENTITY = "Sortie";
 	private static final String LIST_ENTITY = "entity_list.txt";
 	private ArrayList<Entity> myEntities;
 	private Entity currentEntity;
@@ -27,9 +28,19 @@ public class ParserEntity {
 		for (int i = 0; i < files.length; i++) {
 			System.out.println("LOL " + files[i].toString());
 			this.currentFile = extractFileName(files[i].toString());
-			this.read(files[i]);
+			//this.read(files[i]);
 			System.out.println();
 		}
+		
+		File repertoireWithEntity = new File(DIR_NAME_WITH_ENTITY);
+		File[] filesWithEntity = repertoireWithEntity.listFiles();
+		for (int i = 0; i < filesWithEntity.length; i++) {
+			System.out.println("LOL2 " + filesWithEntity[i].toString());
+			//this.currentFile = extractFileName(filesWithEntity[i].toString());
+			this.readForPattern(filesWithEntity[i]);
+			System.out.println();
+		}
+		//File files1 = new File("Sortie/Didier_Pironi.txt");
 
 		// this.currentFile = "Didier_Pironi";
 		// File files = new File("Wikipedia_corpus/Didier_Pironi.txt");
@@ -43,6 +54,10 @@ public class ParserEntity {
 		}
 		System.out.println("NB entities " + this.myEntities.size()
 				+ " nbTriplet " + nbT);
+		
+		for(int i=0; i<PatternExtractor.getTriplet().size(); i++){
+			System.out.print(PatternExtractor.getTriplet().get(i).toString());
+		}
 	}
 
 	private void readEntities() {
@@ -103,6 +118,32 @@ public class ParserEntity {
 		}
 	}
 
+	private void readForPattern(File file) {
+		// File file = new File(fileName);
+		FileInputStream fis = null;
+		BufferedInputStream bis = null;
+		DataInputStream dis = null;
+		firstLine = true;
+		try {
+			fis = new FileInputStream(file);
+			bis = new BufferedInputStream(fis);
+			dis = new DataInputStream(bis);
+
+			while (dis.available() != 0) {
+				PatternExtractor.extractPatterns(dis.readLine());
+			}
+			fis.close();
+			bis.close();
+			dis.close();
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+
+		}
+	}
+	
 	private void parseLine(String line) {
 		// System.out.println("LINE " + line);
 		String sortie = "";
