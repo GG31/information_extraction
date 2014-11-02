@@ -34,7 +34,7 @@ public class Entity {
 		this.identifiants[identifiants.length] = GENDER_ENTITY.get(identifiants[0]);
 		this.triplets = new ArrayList<>();
 		
-		checkTripletFromName();
+		//checkTripletFromName();
 		
 	}
 	
@@ -100,6 +100,10 @@ public class Entity {
 			s += triplet.toString() + "\n";
 		}
 		return s;
+	}
+	
+	public int getNbTriplet(){
+		return this.triplets.size();
 	}
 
 }

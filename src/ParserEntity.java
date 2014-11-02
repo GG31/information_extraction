@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class ParserEntity {
-
+	private static final char[] PONCTUATIONS = { '.', ',', ';', ':', '[', '(', ')', ']' };
 	private static final String DIR_NAME = "Wikipedia_corpus";
 	private static final String DIR_NAME_WITH_ENTITY = "Sortie";
 	private static final String LIST_ENTITY = "entity_list.txt";
@@ -28,36 +28,39 @@ public class ParserEntity {
 		for (int i = 0; i < files.length; i++) {
 			System.out.println("LOL " + files[i].toString());
 			this.currentFile = extractFileName(files[i].toString());
-			//this.read(files[i]);
+			this.read(files[i]);
 			System.out.println();
 		}
-		
+
 		File repertoireWithEntity = new File(DIR_NAME_WITH_ENTITY);
 		File[] filesWithEntity = repertoireWithEntity.listFiles();
 		for (int i = 0; i < filesWithEntity.length; i++) {
-			System.out.println("LOL2 " + filesWithEntity[i].toString());
-			//this.currentFile = extractFileName(filesWithEntity[i].toString());
+			System.out.println("ANALYSE " + filesWithEntity[i].toString());
 			this.readForPattern(filesWithEntity[i]);
 			System.out.println();
 		}
-		//File files1 = new File("Sortie/Didier_Pironi.txt");
 
-		// this.currentFile = "Didier_Pironi";
-		// File files = new File("Wikipedia_corpus/Didier_Pironi.txt");
-		// read(files);
 		// Afficher les triplets
 		System.out.println("ENTITY");
 		int nbT = 0;
 		for (Entity entity : myEntities) {
 			System.out.print(entity.toStringTriplet());
-			nbT++;
+			nbT+=entity.getNbTriplet();
 		}
 		System.out.println("NB entities " + this.myEntities.size()
 				+ " nbTriplet " + nbT);
-		
-		for(int i=0; i<PatternExtractor.getTriplet().size(); i++){
+
+		for (int i = 0; i < PatternExtractor.getTriplet().size(); i++) {
 			System.out.print(PatternExtractor.getTriplet().get(i).toString());
 		}
+		
+		System.out.println("PLOP");
+		int nbTripletType = 0;
+		for (int i = 0; i < TypeExtractor.triplets.size(); i++) {
+			System.out.println(TypeExtractor.triplets.get(i).toString());
+			nbTripletType++;
+		}
+		System.out.println("NB triplet type "+ nbTripletType);
 	}
 
 	private void readEntities() {
@@ -130,7 +133,9 @@ public class ParserEntity {
 			dis = new DataInputStream(bis);
 
 			while (dis.available() != 0) {
-				PatternExtractor.extractPatterns(dis.readLine());
+				String line = dis.readLine();
+				PatternExtractor.extractPatterns(line);
+				TypeExtractor.typeExtractor(line);
 			}
 			fis.close();
 			bis.close();
@@ -143,7 +148,7 @@ public class ParserEntity {
 
 		}
 	}
-	
+
 	private void parseLine(String line) {
 		// System.out.println("LINE " + line);
 		String sortie = "";
@@ -154,9 +159,9 @@ public class ParserEntity {
 			for (int j = 0; j < myEntities.size(); j++) {
 				int n = checkWords(s, i, myEntities.get(j).getIdentifiants(), 0);
 				if (n != 0) {
-					if ((n != 1
-							|| checkWordAfterBefore(s, i, myEntities.get(j)
-									.getIdentifiants())) || i<10) {
+					if ((n != 1 || checkWordAfterBefore(s, i, myEntities.get(j)
+							.getIdentifiants()))
+							|| (i < 10 && firstLine)) {
 						// Verify word before si l'un des deux est un mot
 						// commençant par une majuscule ET n'appartenant pas aux
 						// identifiants alors out
@@ -178,7 +183,7 @@ public class ParserEntity {
 			if (!found) {
 				sortie += s[i] + " ";
 				// check date
-				DateExtractor.dateExtractor(currentEntity, s, i);
+				//DateExtractor.dateExtractor(currentEntity, s, i);
 
 				if (firstLine) {
 					TypeExtractor.typeExtractor(currentEntity, s, i);
@@ -194,15 +199,12 @@ public class ParserEntity {
 
 	private boolean checkWordAfterBefore(String[] words, int index,
 			String[] identifiants) {
-		if (words[index].charAt(words[index].length() - 1) != ','
-				&& words[index].charAt(words[index].length() - 1) != '.'
-				&& startByMaj(words[index + 1])) {
+		if (!endByPonctuation(words[index]) && startByMaj(words[index + 1])) {
 			return false;
 		}
 		if (index > 0) {
 			if (startByMaj(words[index - 1])
-					&& words[index - 1].charAt(words[index - 1].length() - 1) != '.'
-					&& words[index - 1].charAt(words[index - 1].length() - 1) != ',') {
+					&& !endByPonctuation(words[index - 1])) {
 				for (int i = 0; i < identifiants.length; i++) {
 
 					if (words[index - 1].equals(identifiants[i]))
@@ -212,6 +214,14 @@ public class ParserEntity {
 			}
 		}
 		return true;
+	}
+
+	private boolean endByPonctuation(String word) {
+		for (char c : PONCTUATIONS) {
+			if (word.charAt(word.length() - 1) == c)
+				return true;
+		}
+		return false;
 	}
 
 	private boolean startByMaj(String word) {
@@ -225,8 +235,7 @@ public class ParserEntity {
 		if (indexE >= entity.length || indexW >= words.length)
 			return 0;
 		if (words[indexW].toLowerCase().equals(entity[indexE])
-				|| words[indexW].toLowerCase().equals(entity[indexE] + ".")
-				|| words[indexW].toLowerCase().equals(entity[indexE] + ",") || words[indexW].toLowerCase().equals(entity[indexE] + "'s")) {
+				|| compareWithPonct(words[indexW], entity[indexE])) {
 			if ((entity[indexE].equals("he") || entity[indexE].equals("she") || entity[indexE]
 					.equals("it")) && !(compareToFileEntity(entity)))
 				return 0;
@@ -234,7 +243,31 @@ public class ParserEntity {
 		} else {
 			return checkWords(words, indexW, entity, ++indexE);
 		}
+	}
 
+	private boolean compareWithPonct(String word, String wordEntity) {
+		for (char c : PONCTUATIONS) {
+			if (lastChar(word) == c) {
+				if (word.toLowerCase().equals(wordEntity + c)) {
+					return true;
+				}else if (c == ']') {
+					if (word.toLowerCase().indexOf('[') > 0) {
+						return compareWithPonct(
+								word.substring(0, word.indexOf('[')),
+								wordEntity);
+					}
+				}
+			}
+		}
+		if (word.toLowerCase().equals(wordEntity + "'s"))
+			return true;
+		return false;
+	}
+
+	private char lastChar(String word) {
+		if(word.length()>0)
+		return word.charAt(word.length() - 1);
+		return ' ';
 	}
 
 	private String extractFileName(String chaine) {

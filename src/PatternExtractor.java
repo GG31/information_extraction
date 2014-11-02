@@ -12,7 +12,7 @@ public class PatternExtractor {
     static
     {
     	PATTERNS = new HashMap<String, ArrayList<String>>();
-    	PATTERNS.put("marriedTo", new ArrayList<String>(){{ add("is married to"); add("is wife of"); }} );
+    	PATTERNS.put("marriedTo", new ArrayList<String>(){{ add("is married to"); add("is wife of"); add("is the husband of"); add("has been married to");}} );
     }
     
     public static void extractPatterns(String line) {
@@ -26,20 +26,14 @@ public class PatternExtractor {
     private static ArrayList<Triplet> triplet = new ArrayList<>();
     
     private static void checkPattern(String line, String patternKey, String patternPossible) {
-    	System.out.println("TESTING " + REGULAR_EXPRESSION1 + patternPossible + REGULAR_EXPRESSION2);
-    	System.out.println("ON LINE " + line);
+    	//System.out.println("TESTING " + REGULAR_EXPRESSION1 + patternPossible + REGULAR_EXPRESSION2);
+    	//System.out.println("ON LINE " + line);
     	Pattern p1 = Pattern.compile(REGULAR_EXPRESSION1 + patternPossible + REGULAR_EXPRESSION2);
     	Matcher m = p1.matcher(line);
-    	System.out.println("nb group " + m.groupCount());
     	if (m.matches())
 		{
-		   System.out.println ("Premier nombre : " + m.group (1));
-		   System.out.println ("Deuxième nombre : " + m.group (2));
-		   //entity.addTriplet(patternKey, m.group(2));
+    		System.out.println(line);
 		   triplet.add(new Triplet(m.group(1), patternKey, m.group(2)));
-		}
-		else{
-			System.out.println("FAIL");
 		}
     }
     
