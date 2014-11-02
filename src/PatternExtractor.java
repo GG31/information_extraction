@@ -23,22 +23,15 @@ public class PatternExtractor {
     	}
     }
     
-    private static ArrayList<Triplet> triplet = new ArrayList<>();
     
     private static void checkPattern(String line, String patternKey, String patternPossible) {
-    	//System.out.println("TESTING " + REGULAR_EXPRESSION1 + patternPossible + REGULAR_EXPRESSION2);
-    	//System.out.println("ON LINE " + line);
     	Pattern p1 = Pattern.compile(REGULAR_EXPRESSION1 + patternPossible + REGULAR_EXPRESSION2);
     	Matcher m = p1.matcher(line);
     	if (m.matches())
 		{
-    		System.out.println(line);
-		   triplet.add(new Triplet(m.group(1), patternKey, m.group(2)));
+    		ParserEntity.triplets.add(new Triplet(m.group(1), patternKey, m.group(2)));
 		}
     }
     
-    public static ArrayList<Triplet> getTriplet() {
-    	return triplet;
-    }
 
 }

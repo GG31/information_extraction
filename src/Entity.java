@@ -33,20 +33,6 @@ public class Entity {
 		}
 		this.identifiants[identifiants.length] = GENDER_ENTITY.get(identifiants[0]);
 		this.triplets = new ArrayList<>();
-		
-		//checkTripletFromName();
-		
-	}
-	
-	private void checkTripletFromName() {
-		if(this.name.indexOf(',') != -1) {
-			addTriplet("type", "city");
-		}
-		int n = this.name.indexOf('(');
-		if(n != -1) {
-			String value = this.name.substring(n+1, this.name.length()-1).replace("_", " ");
-			addTriplet("type", value);
-		}
 	}
 	
 	public String getUri(){
@@ -64,7 +50,6 @@ public class Entity {
 	private String extractName(String chaine) {
 		int n = chaine.length() - 1;
 		while (n >= 0) {
-			// System.out.println(s.charAt(n));
 			if (chaine.charAt(n) == '/') {
 				return chaine.substring(n + 1);
 			}
@@ -75,19 +60,7 @@ public class Entity {
 	
 	private String[] splitName(String fileName) {
 		String[] s = fileName.replace(",", "").replace("\n", "").split("_");
-		if(fileName.equals("Aomori,_Aomori"))
-			System.out.println("int split " + s[0]+"/"+s[1]+"/"+s.length);
 		return s;
-	}
-	
-	private boolean exist(String subj, String prop) {
-		for (int i = 0; i < triplets.size(); i++) {
-			if (triplets.get(i).getSubject().equals(subj)
-					&& triplets.get(i).getPropriete().equals(prop)) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	public String toString(){

@@ -14,6 +14,7 @@ public class ParserEntity {
 	private static final String DIR_NAME_WITH_ENTITY = "Sortie";
 	private static final String LIST_ENTITY = "entity_list.txt";
 	private ArrayList<Entity> myEntities;
+	public static ArrayList<Triplet> triplets;
 	private Entity currentEntity;
 	private String currentFile;
 	private boolean firstLine;
@@ -21,13 +22,14 @@ public class ParserEntity {
 	public ParserEntity() {
 		this.firstLine = true;
 		this.myEntities = new ArrayList<>();
+		this.triplets = new ArrayList<>();
 		readEntities();
 
 		File repertoire = new File(DIR_NAME);
 		File[] files = repertoire.listFiles();
 		for (int i = 0; i < files.length; i++) {
 			System.out.println("LOL " + files[i].toString());
-			this.currentFile = extractFileName(files[i].toString());
+			this.currentFile = extractName(files[i].toString());
 			this.read(files[i]);
 			System.out.println();
 		}
@@ -35,32 +37,17 @@ public class ParserEntity {
 		File repertoireWithEntity = new File(DIR_NAME_WITH_ENTITY);
 		File[] filesWithEntity = repertoireWithEntity.listFiles();
 		for (int i = 0; i < filesWithEntity.length; i++) {
-			System.out.println("ANALYSE " + filesWithEntity[i].toString());
 			this.readForPattern(filesWithEntity[i]);
-			System.out.println();
 		}
 
 		// Afficher les triplets
 		System.out.println("ENTITY");
 		int nbT = 0;
-		for (Entity entity : myEntities) {
-			System.out.print(entity.toStringTriplet());
-			nbT+=entity.getNbTriplet();
+		for(Triplet t: this.triplets){
+			System.out.println(t.toString());
+			nbT++;
 		}
-		System.out.println("NB entities " + this.myEntities.size()
-				+ " nbTriplet " + nbT);
-
-		for (int i = 0; i < PatternExtractor.getTriplet().size(); i++) {
-			System.out.print(PatternExtractor.getTriplet().get(i).toString());
-		}
-		
-		System.out.println("PLOP");
-		int nbTripletType = 0;
-		for (int i = 0; i < TypeExtractor.triplets.size(); i++) {
-			System.out.println(TypeExtractor.triplets.get(i).toString());
-			nbTripletType++;
-		}
-		System.out.println("NB triplet type "+ nbTripletType);
+		System.out.println("NB triplet type "+ nbT);
 	}
 
 	private void readEntities() {
@@ -80,6 +67,7 @@ public class ParserEntity {
 			while (dis.available() != 0) {
 				String s = dis.readLine();
 				Entity e = new Entity(s);
+				checkTripletFromName(s, extractName(s));
 				myEntities.add(e);
 			}
 
@@ -183,11 +171,8 @@ public class ParserEntity {
 			if (!found) {
 				sortie += s[i] + " ";
 				// check date
-				//DateExtractor.dateExtractor(currentEntity, s, i);
+				DateExtractor.dateExtractor(currentEntity, s, i);
 
-				if (firstLine) {
-					TypeExtractor.typeExtractor(currentEntity, s, i);
-				}
 			} else {
 				i--;
 			}
@@ -269,10 +254,11 @@ public class ParserEntity {
 		return word.charAt(word.length() - 1);
 		return ' ';
 	}
-
-	private String extractFileName(String chaine) {
+	
+	private String extractName(String chaine) {
 		int n = chaine.length() - 1;
 		while (n >= 0) {
+			// System.out.println(s.charAt(n));
 			if (chaine.charAt(n) == '/') {
 				return chaine.substring(n + 1);
 			}
@@ -294,6 +280,17 @@ public class ParserEntity {
 		String[] s = fileName.substring(0, fileName.length() - 4)
 				.replace(",", "").replace("\n", "").split("_");
 		return s;
+	}
+	
+	private void checkTripletFromName(String uri, String name) {
+		if(name.indexOf(',') != -1) {
+			this.triplets.add(new Triplet(uri, "type", "city"));
+		}
+		int n = name.indexOf('(');
+		if(n != -1) {
+			String value = name.substring(n+1, name.length()-1).replace("_", " ");
+			this.triplets.add(new Triplet(uri, "type", value));
+		}
 	}
 
 	private void writeFile(String content) {

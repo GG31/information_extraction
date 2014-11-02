@@ -1,4 +1,6 @@
 README
+
+Auteur : Geneviève CIRERA, SI5- WEB
 ===============================================================
 
 ParserEntity lit le fichier des entity et les crée. En les lisant, il ajoute les types qui peuvent être trouvés dans les noms des entités.
@@ -18,9 +20,13 @@ Chaque fichier analysé est réécrit dans le dossier "Sortie" avec les balises.
 DateExtractor essaye de trouver le mot born suivit d'un nombre, un mois et une années ou des parenthèses où il y aurait une ou plusieurs date.
 Si elle trouve un de ses cas, elle formalise la date au format AAAA-MM-JJ et crée un triplet dans l'entité avec la propriété "hasDate" et la date de naissance.
 
-TypeExtractor...
+TypeExtractor retrouve le type de l'entité. Pour cela, la classe se sert d'un pattern d'expression régulière. J'ai défini dans une arraylist, toutes les possiblités pour exprimer le type ("is a", "is an", "was a", "was an"). Qui se remplacera dans l'expression régulière :".*entity name=\"(\\D+)\".*entity(\\D+) " + "is a" + " (\\D+)"
+On pourra récupérer l'uri, la potentielle chaine de caractères qui suit "entity" et tout ce qui suit "is a" après l'application du pattern dans chaque phrase des pages wikipedia. S'il matche, premièrement on vérifie qu'il n'y a pas de "and" dans la deuxième chaine qu'on récupère car ça voudrait dire qu'on ne parle plus de la même entité. 
+Ensuite on analyse ce qui suit "is a", "is an", "was a" ou "was an". L'uri de l'entité en question est récupérée lors de l'application du pattern, ce qui permet de former un triplet.
+L'analyse considère que si on a "actor, photographer and painter" cela équivaut à 3 types différents et donc 3 triplets.
+Si la phrase est "is an actor who", "who" est considéré comme délimitateur, on ne conservera que "actor" dans le triplet. D'autres délimitateur sont définis en paramètre tels que "from", "of", "where"...
 
-La classe PatternExtractor se charge de trouver les patterns. Pour cela, les fichiers de "Sortie" sont lus afin d'avoir les fichiers avec les balises entity.
+La classe PatternExtractor se charge de trouver les patterns entre deux entités. Pour cela, les fichiers de "Sortie" sont lus afin d'avoir les fichiers avec les balises entity.
 Dans cette classe les patterns à rechercher sont dans une hashmap avec pour clé le nom de la relation et pour valeur une arraylist avec toutes les possibilités pour exprimer cette relation.
 On sait que toutes ces relations sont entre deux entités, donc on aura quelque chose du type <entity name="uri1">Personne1</entity> is married to <entity name="uri2">Personne2</entity>
 Pour récupérer les uris encadrants "is married to" j'ai utilisé une expression régulière : ".*entity name=\"(\\D+)\".*entity. "+ "is married to" +" .entity name=\"(\\D+)\"..*"

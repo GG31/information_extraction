@@ -32,11 +32,11 @@ public class DateExtractor {
 		        	year = Integer.parseInt(words[index+3].substring(0, words[index+3].length()-1)); 
 		        }else
 		        	year= Integer.parseInt(words[index+3]); 
-		        entity.addTriplet("hasDate", formalizeDate(day, month,year));        
+		        ParserEntity.triplets.add(new Triplet(entity.getUri(),"hasDate", formalizeDate(day, month,year)));        
 		    } catch(NumberFormatException e) { 
 		    	try{
 		    		int year= Integer.parseInt(words[index+1]);
-		    		entity.addTriplet("hasDate", year + "");
+		    		ParserEntity.triplets.add(new Triplet(entity.getUri(),"hasDate", year + "")); 
 		    	} catch(NumberFormatException e1){
 		    		
 		    	}
@@ -51,7 +51,7 @@ public class DateExtractor {
 		        	year = Integer.parseInt(words[index+2].substring(0, words[index+2].length()-1)); 
 		        }else
 		        	year= Integer.parseInt(words[index+2]); 
-		        entity.addTriplet("hasDate", formalizeDate(day, month,year)); 
+		        	ParserEntity.triplets.add(new Triplet(entity.getUri(),"hasDate",formalizeDate(day, month,year)));  
 				}
 		    } catch(NumberFormatException e) { 
 		    }catch(ArrayIndexOutOfBoundsException e) {
