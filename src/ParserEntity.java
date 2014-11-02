@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class ParserEntity {
-	private static final char[] PONCTUATIONS = { '.', ',', ';', ':', '[', '(', ')', ']' };
+	private static final char[] PONCTUATIONS = { '.', ',', ';', ':', '[', '(', ')', ']', '?', '!' };
 	private static final String DIR_NAME = "Wikipedia_corpus";
-	private static final String DIR_NAME_WITH_ENTITY = "Sortie";
+	private static final String DIR_NAME_WITH_ENTITY = "Sortie/";
 	private static final String LIST_ENTITY = "entity_list.txt";
 	private ArrayList<Entity> myEntities;
 	public static ArrayList<Triplet> triplets;
@@ -24,30 +24,37 @@ public class ParserEntity {
 		this.myEntities = new ArrayList<>();
 		this.triplets = new ArrayList<>();
 		readEntities();
-
+		
+		//Delete all file with entities
+		File repertoireEntity = new File(DIR_NAME_WITH_ENTITY);
+		File[] filesEntity = repertoireEntity.listFiles();
+		for(File f :filesEntity)
+			f.delete();
+		
+		//Find wikipedia file
 		File repertoire = new File(DIR_NAME);
 		File[] files = repertoire.listFiles();
 		for (int i = 0; i < files.length; i++) {
-			System.out.println("LOL " + files[i].toString());
 			this.currentFile = extractName(files[i].toString());
 			this.read(files[i]);
-			System.out.println();
 		}
 
+		//Find triplet with patterns
 		File repertoireWithEntity = new File(DIR_NAME_WITH_ENTITY);
 		File[] filesWithEntity = repertoireWithEntity.listFiles();
 		for (int i = 0; i < filesWithEntity.length; i++) {
 			this.readForPattern(filesWithEntity[i]);
 		}
 
-		// Afficher les triplets
-		System.out.println("ENTITY");
+		// Show triplets
 		int nbT = 0;
+		String entities ="";
 		for(Triplet t: this.triplets){
-			System.out.println(t.toString());
+			entities=entities+t.toString()+"\n";
 			nbT++;
 		}
-		System.out.println("NB triplet type "+ nbT);
+		entities = entities+"NB triplet "+ nbT;
+		writeFile("triplets.txt", entities);
 	}
 
 	private void readEntities() {
@@ -110,7 +117,6 @@ public class ParserEntity {
 	}
 
 	private void readForPattern(File file) {
-		// File file = new File(fileName);
 		FileInputStream fis = null;
 		BufferedInputStream bis = null;
 		DataInputStream dis = null;
@@ -123,7 +129,8 @@ public class ParserEntity {
 			while (dis.available() != 0) {
 				String line = dis.readLine();
 				PatternExtractor.extractPatterns(line);
-				TypeExtractor.typeExtractor(line);
+				TypeExtractor.patternExtractor(line);
+				//TypeExtractor.capitalExtrator(line);
 			}
 			fis.close();
 			bis.close();
@@ -179,7 +186,7 @@ public class ParserEntity {
 
 		}
 		firstLine = false;
-		writeFile(sortie + "\n");
+		writeFile(this.currentFile, sortie + "\n");
 	}
 
 	private boolean checkWordAfterBefore(String[] words, int index,
@@ -293,9 +300,9 @@ public class ParserEntity {
 		}
 	}
 
-	private void writeFile(String content) {
+	private void writeFile(String file, String content) {
 		try {
-			FileWriter fw = new FileWriter("Sortie/" + this.currentFile, true);
+			FileWriter fw = new FileWriter(DIR_NAME_WITH_ENTITY + file, true);
 			BufferedWriter output = new BufferedWriter(fw);
 			output.write(content);
 			output.flush();

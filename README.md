@@ -26,6 +26,13 @@ Ensuite on analyse ce qui suit "is a", "is an", "was a" ou "was an". L'uri de l'
 L'analyse considère que si on a "actor, photographer and painter" cela équivaut à 3 types différents et donc 3 triplets.
 Si la phrase est "is an actor who", "who" est considéré comme délimitateur, on ne conservera que "actor" dans le triplet. D'autres délimitateur sont définis en paramètre tels que "from", "of", "where"...
 
+Deux autres patterns ont été implémentés, "capital" et "was formed in". Ainsi dès que l'algorithme trouve une entité suivit plus ou moins loin de "capital" ou "was formed in", il crée les triplets associés.
+On remarquera dans triplets.txt, les triplets
+<"http://en.wikipedia.org/wiki/Tokyo","formedIn","1943">
+<"http://en.wikipedia.org/wiki/Tokyo","capital","Japan">
+<"http://en.wikipedia.org/wiki/Tokyo","type","capital">
+Il suffit d'ajouter à la HashMap les mots clés des patterns "capital", "formedIn" avec leurs mots clés associés et l'expression régulière trouve toutes les chaines de caractères conformes, les parses et crée les triplets.
+
 La classe PatternExtractor se charge de trouver les patterns entre deux entités. Pour cela, les fichiers de "Sortie" sont lus afin d'avoir les fichiers avec les balises entity.
 Dans cette classe les patterns à rechercher sont dans une hashmap avec pour clé le nom de la relation et pour valeur une arraylist avec toutes les possibilités pour exprimer cette relation.
 On sait que toutes ces relations sont entre deux entités, donc on aura quelque chose du type <entity name="uri1">Personne1</entity> is married to <entity name="uri2">Personne2</entity>

@@ -11,7 +11,7 @@ public class Triplet {
 	}
 	
 	public String toString() {
-		return "<" + subject + "," + property + "," + value + ">";
+		return "<\"" + subject + "\",\"" + property + "\",\"" + value + "\">";
 	}
 	
 	public String getSubject() {
